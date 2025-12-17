@@ -20,7 +20,7 @@ class ApiClient {
     // Use environment variable or default to localhost:8000
     // Safely check for process.env to avoid ReferenceError in some environments
     const env = typeof process !== 'undefined' ? process.env : {};
-    this.baseUrl = env.REACT_APP_BACKEND_URL || 'https://backend-bmai.onrender.com';
+    this.baseUrl = 'https://backend-bmai.onrender.com';
   }
 
   async sendChatMessage(message: string, sessionId?: string): Promise<ChatResponse> {
