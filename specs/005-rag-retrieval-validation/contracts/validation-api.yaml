@@ -1,0 +1,56 @@
+# API Contract: RAG Retrieval Validation
+
+## Endpoints
+
+### POST /validate-retrieval
+
+Validate the RAG retrieval pipeline with a given query.
+
+**Request**:
+```json
+{
+  "query": "string, the text query to validate",
+  "top_k": "integer, number of results to retrieve (default: 5)",
+  "validate_metadata": "boolean, whether to validate metadata integrity (default: true)"
+}
+```
+
+**Response (Success)**:
+```json
+{
+  "status": "string, 'success'",
+  "query_embedding": "array[float], the embedding vector for the query",
+  "results": [
+    {
+      "id": "string, unique identifier for the chunk",
+      "content": "string, the retrieved content chunk",
+      "similarity_score": "float, cosine similarity score",
+      "metadata": {
+        "url": "string, source URL",
+        "chunk_index": "integer, position in original document"
+      }
+    }
+  ],
+  "search_time_ms": "float, time taken for the search",
+  "validation_metrics": {
+    "metadata_integrity": "boolean, whether metadata was preserved",
+    "relevance_score": "float, measure of semantic relevance",
+    "processing_time_ms": "float, time for validation processing"
+  }
+}
+```
+
+**Response (Error)**:
+```json
+{
+  "status": "string, 'error'",
+  "error_code": "string, error identifier",
+  "message": "string, human-readable error message"
+}
+```
+
+**Error Codes**:
+- `QDRANT_CONNECTION_FAILED`: Unable to connect to Qdrant Cloud
+- `EMBEDDING_GENERATION_FAILED`: Cohere API error during embedding
+- `NO_RESULTS_FOUND`: Query returned no matching results
+- `METADATA_INTEGRITY_VIOLATION`: Retrieved metadata doesn't match expectations

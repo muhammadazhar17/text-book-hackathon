@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: URL Ingestion API
+  description: API for managing the URL ingestion process into vector storage
+  version: 1.0.0
+
+paths:
+  /api/ingest:
+    post:
+      summary: Start the ingestion process
+      description: Initiates the process of fetching URLs from sitemap, extracting content, generating embeddings, and storing in Qdrant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sitemap_url:
+                  type: string
+                  description: URL of the sitemap to ingest
+                  example: "https://pre-hackathon-text-book-as.vercel.app/sitemap.xml"
+                collection_name:
+                  type: string
+                  description: Name of the Qdrant collection to store embeddings
+                  default: "embeddingone"
+              required:
+                - sitemap_url
+      responses:
+        '200':
+          description: Ingestion process started successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                    description: Unique identifier for the ingestion job
+                  status:
+                    type: string
+                    description: Current status of the job
+                    enum: [processing]
+                  message:
+                    type: string
+                    description: Status message
+        '400':
+          description: Bad request - invalid input parameters
+        '500':
+          description: Internal server error
+
+  /api/ingest/status/{job_id}:
+    get:
+      summary: Get ingestion job status
+      description: Retrieve the current status of an ingestion job
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, processing, completed, failed]
+                  total_urls:
+                    type: integer
+                  processed_urls:
+                    type: integer
+                  total_chunks:
+                    type: integer
+                  error:
+                    type: string
+        '404':
+          description: Job not found
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    ContentChunk:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the chunk
+        content:
+          type: string
+          description: The actual text content of the chunk
+        url:
+          type: string
+          description: The source URL where the content was extracted from
+        chunk_index:
+          type: integer
+          description: The position of this chunk in the original document
+        embedding:
+          type: array
+          items:
+            type: number
+            format: float
+          description: 1024-dimensional vector representation of the content
+        metadata:
+          type: object
+          properties:
+            title:
+              type: string
+            created_at:
+              type: string
+              format: date-time
+        created_at:
+          type: string
+          format: date-time
+      required:
+        - content
+        - url
+        - embedding

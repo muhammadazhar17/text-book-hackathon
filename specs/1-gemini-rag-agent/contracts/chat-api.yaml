@@ -1,0 +1,149 @@
+# API Contracts: Intelligent Query Response System
+
+## Endpoints
+
+### POST /chat
+**Description**: Accepts a user query and returns a contextually relevant response based on retrieved information from the knowledge base.
+
+**Request**:
+```json
+{
+  "query": "What are the key principles of physical AI?",
+  "user_id": "optional-user-identifier"
+}
+```
+
+**Request Schema**:
+```yaml
+type: object
+properties:
+  query:
+    type: string
+    description: The user's query or question
+    minLength: 1
+    maxLength: 10000
+  user_id:
+    type: string
+    description: Optional identifier for the user
+    nullable: true
+required:
+  - query
+```
+
+**Response (Success - 200 OK)**:
+```json
+{
+  "response": "Physical AI combines principles of artificial intelligence with physical systems...",
+  "sources": [
+    "Physical AI Principles Document, Section 2.1",
+    "Humanoid Robotics Fundamentals, Chapter 5"
+  ],
+  "retrieval_details": {
+    "chunks_count": 3,
+    "retrieved_chunks": [
+      {
+        "content": "Physical AI is defined as the integration of AI algorithms with physical systems...",
+        "source": "Physical AI Principles Document, Section 2.1",
+        "score": 0.85
+      },
+      {
+        "content": "The key components of physical AI include perception, reasoning, and action...",
+        "source": "Humanoid Robotics Fundamentals, Chapter 5",
+        "score": 0.78
+      }
+    ]
+  },
+  "timestamp": "2025-12-14T10:30:00Z"
+}
+```
+
+**Response Schema**:
+```yaml
+type: object
+properties:
+  response:
+    type: string
+    description: The generated response to the user's query
+  sources:
+    type: array
+    items:
+      type: string
+    description: List of sources referenced in the response
+  retrieval_details:
+    type: object
+    properties:
+      chunks_count:
+        type: integer
+        description: Number of document chunks retrieved
+      retrieved_chunks:
+        type: array
+        items:
+          type: object
+          properties:
+            content:
+              type: string
+              description: Content of the retrieved chunk
+            source:
+              type: string
+              description: Source reference for the chunk
+            score:
+              type: number
+              description: Relevance score for the chunk
+  timestamp:
+    type: string
+    format: date-time
+    description: When the response was generated
+required:
+  - response
+  - sources
+  - retrieval_details
+  - timestamp
+```
+
+**Error Responses**:
+
+**400 Bad Request**:
+```json
+{
+  "error": "Invalid query format",
+  "details": "Query must be a non-empty string"
+}
+```
+
+**500 Internal Server Error**:
+```json
+{
+  "error": "Processing failed",
+  "details": "Unable to process the query at this time"
+}
+```
+
+### GET /health
+**Description**: Health check endpoint to verify the service is running.
+
+**Response (Success - 200 OK)**:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-12-14T10:30:00Z"
+}
+```
+
+## Error Handling
+
+### Standard Error Format
+```json
+{
+  "error": "Error message",
+  "details": "Additional error details",
+  "timestamp": "2025-12-14T10:30:00Z"
+}
+```
+
+### Error Codes
+- **400**: Bad Request - Invalid input format
+- **401**: Unauthorized - Missing or invalid API credentials (if applicable)
+- **429**: Too Many Requests - Rate limit exceeded
+- **500**: Internal Server Error - Processing failed
+- **502**: Bad Gateway - External service (Gemini, Cohere, Qdrant) unavailable
+- **503**: Service Unavailable - System temporarily overloaded

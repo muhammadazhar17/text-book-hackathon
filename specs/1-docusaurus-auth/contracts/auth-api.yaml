@@ -1,0 +1,109 @@
+# Authentication API Contract
+
+## Overview
+This document defines the API contracts for the Better Auth integration with the Docusaurus frontend.
+
+## Authentication Endpoints
+
+### POST /api/auth/login
+Authenticate a user with email and password.
+
+**Request:**
+```json
+{
+  "email": "user@example.com",
+  "password": "securePassword123"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "user": {
+    "id": "user_123456789",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "hardwareBackground": "Robotics engineer with 5 years experience",
+    "softwareBackground": "Python, ROS2, C++"
+  },
+  "session": {
+    "token": "session_token_abc123",
+    "expiresAt": "2024-12-17T10:00:00Z"
+  }
+}
+```
+
+**Response (401 Unauthorized):**
+```json
+{
+  "error": "Invalid email or password"
+}
+```
+
+### POST /api/auth/signup
+Register a new user with email, password, and optional background information.
+
+**Request:**
+```json
+{
+  "email": "newuser@example.com",
+  "password": "securePassword123",
+  "name": "Jane Smith",
+  "hardwareBackground": "Experience with Arduino and Raspberry Pi",
+  "softwareBackground": "JavaScript, Python, ROS"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "user": {
+    "id": "user_987654321",
+    "email": "newuser@example.com",
+    "name": "Jane Smith",
+    "hardwareBackground": "Experience with Arduino and Raspberry Pi",
+    "softwareBackground": "JavaScript, Python, ROS"
+  }
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "error": "Email already exists"
+}
+```
+
+### POST /api/auth/logout
+Log out the current user and invalidate their session.
+
+**Response (200 OK):**
+```json
+{
+  "success": true
+}
+```
+
+### GET /api/auth/me
+Get the current authenticated user's profile information.
+
+**Response (200 OK):**
+```json
+{
+  "user": {
+    "id": "user_123456789",
+    "email": "user@example.com",
+    "name": "John Doe",
+    "hardwareBackground": "Robotics engineer with 5 years experience",
+    "softwareBackground": "Python, ROS2, C++",
+    "createdAt": "2024-12-01T10:00:00Z"
+  }
+}
+```
+
+**Response (401 Unauthorized):**
+```json
+{
+  "error": "Not authenticated"
+}
+```

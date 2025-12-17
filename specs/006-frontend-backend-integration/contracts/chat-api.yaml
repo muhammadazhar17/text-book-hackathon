@@ -1,0 +1,114 @@
+# API Contract: Chat Endpoint
+
+## Endpoint: POST /chat
+
+### Description
+Endpoint for sending user queries to the RAG agent and receiving responses. This endpoint was implemented in Spec 3 and is being consumed by the frontend integration.
+
+### Request
+
+**Method**: POST
+**Path**: `/chat`
+**Content-Type**: `application/json`
+
+#### Request Body Schema
+```json
+{
+  "message": {
+    "type": "string",
+    "description": "The user's query to be processed by the RAG agent",
+    "minLength": 1,
+    "maxLength": 2000,
+    "example": "What are the key principles of humanoid robotics?"
+  },
+  "sessionId": {
+    "type": "string",
+    "description": "Optional session identifier to maintain conversation context",
+    "nullable": true,
+    "example": "sess_abc123"
+  }
+}
+```
+
+### Response
+
+#### Success Response (200 OK)
+```json
+{
+  "response": {
+    "type": "string",
+    "description": "The RAG agent's response to the user's query",
+    "example": "The key principles of humanoid robotics include..."
+  },
+  "sources": {
+    "type": "array",
+    "items": {
+      "type": "string"
+    },
+    "description": "Optional list of source documents referenced in the response",
+    "nullable": true,
+    "example": ["doc1.pdf", "doc2.md"]
+  }
+}
+```
+
+#### Error Response (400 Bad Request)
+```json
+{
+  "error": {
+    "type": "string",
+    "description": "Error message describing what went wrong",
+    "example": "Message field is required"
+  }
+}
+```
+
+#### Server Error Response (500 Internal Server Error)
+```json
+{
+  "error": {
+    "type": "string",
+    "description": "Error message for server-side failures",
+    "example": "Failed to process the query"
+  }
+}
+```
+
+### Headers
+- **Request Headers**:
+  - `Content-Type: application/json`
+  - `Accept: application/json`
+
+- **Response Headers**:
+  - `Content-Type: application/json`
+
+### Example Request
+```http
+POST /chat
+Content-Type: application/json
+
+{
+  "message": "What are the main components of a humanoid robot?",
+  "sessionId": "sess_abc123"
+}
+```
+
+### Example Response
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "response": "The main components of a humanoid robot include actuators for movement, sensors for perception, a control system for coordination, and a power system for operation.",
+  "sources": ["actuators.md", "sensors.md"]
+}
+```
+
+### Security Considerations
+- Input validation is performed on the message field to prevent injection attacks
+- Rate limiting should be implemented to prevent abuse
+- Session management for conversation context should be secure
+
+### Performance Requirements
+- Response time should be under 5 seconds for typical queries
+- The endpoint should handle concurrent requests efficiently

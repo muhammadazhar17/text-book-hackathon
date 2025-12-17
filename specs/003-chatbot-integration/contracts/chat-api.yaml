@@ -1,0 +1,90 @@
+# Chat API Contract
+
+## Overview
+This document specifies the API contract for communication between the Docusaurus frontend chat widget and the backend chatbot service.
+
+## Base URL
+The base URL for the chat API is configured via environment variables and may differ between environments:
+
+- Development: `http://localhost:8000/api` (or as configured)
+- Production: `[configured backend URL]`
+
+## Common Headers
+- `Content-Type: application/json`
+- `Accept: application/json`
+
+## Endpoints
+
+### POST /chat
+Sends a message to the chatbot and receives a response.
+
+#### Request
+```json
+{
+  "message": "Hello, how can you help me with physical AI?",
+  "sessionId": "optional-session-id"
+}
+```
+
+#### Response (Success - 200 OK)
+```json
+{
+  "response": "Hello! I can help you understand concepts in physical AI and robotics. What specific topic would you like to explore?",
+  "sessionId": "session-id",
+  "timestamp": "2025-12-10T10:30:00Z"
+}
+```
+
+#### Response (Error - 400 Bad Request)
+```json
+{
+  "error": "Message is required and cannot be empty",
+  "code": "INVALID_INPUT"
+}
+```
+
+#### Response (Server Error - 500 Internal Server Error)
+```json
+{
+  "error": "Chat service is temporarily unavailable",
+  "code": "SERVICE_UNAVAILABLE"
+}
+```
+
+### POST /chat/stream
+(Optional) Streaming endpoint for real-time chat responses.
+
+#### Request
+```json
+{
+  "message": "Explain reinforcement learning in robotics",
+  "sessionId": "optional-session-id"
+}
+```
+
+#### Response
+Server-Sent Events (SSE) stream with JSON data:
+```json
+{
+  "response": "Reinforcement learning in robotics...",
+  "sessionId": "session-id",
+  "timestamp": "2025-12-10T10:30:00Z",
+  "isComplete": false
+}
+```
+
+Last message in stream:
+```json
+{
+  "response": "...",
+  "sessionId": "session-id",
+  "timestamp": "2025-12-10T10:30:05Z",
+  "isComplete": true
+}
+```
+
+## Error Codes
+- `INVALID_INPUT`: Request data is invalid or missing required fields
+- `SERVICE_UNAVAILABLE`: Backend service is temporarily down
+- `RATE_LIMITED`: Request rate limit exceeded
+- `SESSION_EXPIRED`: The conversation session has expired
