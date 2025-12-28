@@ -11,7 +11,7 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://text-book-hackathon.vercel.app',
+  url: 'https://pre-hackathon-text-book-ass.vercel.app',
   baseUrl: '/',
 
   organizationName: 'physical-ai',
